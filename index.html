@@ -8,10 +8,6 @@
   <!-- Browser Tab Clock Icon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>">
 
-  <!-- Keep-Silk-Open Script & Wake Lock Helper to prevent Echo/Silk timeout -->
-  <script src="https://dagammla.gitlab.io/keep-silk-open/keep.js"></script>
-  <script>var AlwaysUseSilk = true;</script>
-
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -620,13 +616,8 @@
     select:disabled, input:disabled { opacity: 0.35; cursor: not-allowed; }
   </style>
 </head>
+
 <body>
-
-  <!-- Invisible Keep-Alive Video Element to prevent Silk Browser from timing out / sleeping -->
-  <video id="keep-awake-video" muted playsinline loop style="display:none; width:1px; height:1px; position:absolute; pointer-events:none;">
-    <source src="https://assets.mixkit.co/videos/preview/mixkit-solid-black-background-1215-large.mp4" type="video/mp4">
-  </video>
-
   <div id="clock-wrapper">
     <div id="time-container">
       <div id="time">12:00 <span class="ampm-text">PM</span></div>
@@ -852,37 +843,6 @@
     let prevHour = '';
     let prevMinute = '';
     let prevSecond = '';
-
-    // Anti-timeout keeper for Amazon Echo Show / Silk browser
-    function initKeepAwake() {
-      const video = document.getElementById('keep-awake-video');
-      if (video) {
-        video.play().catch(() => {
-          // Autoplay policy fallback: play on first user interaction/click anywhere
-          document.addEventListener('click', () => {
-            video.play().catch(e => console.log("Keep-awake video play error:", e));
-          }, { once: true });
-        });
-      }
-      
-      // Secondary WakeLock API fallback if supported
-      if ('wakeLock' in navigator) {
-        let wakeLock = null;
-        async function requestWakeLock() {
-          try {
-            wakeLock = await navigator.wakeLock.request('screen');
-          } catch (err) {
-            console.log("Wake Lock error:", err);
-          }
-        }
-        requestWakeLock();
-        document.addEventListener('visibilitychange', () => {
-          if (wakeLock !== null && document.visibilityState === 'visible') {
-            requestWakeLock();
-          }
-        });
-      }
-    }
 
     function getMoonPhaseClass() {
       const d = new Date();
@@ -1456,7 +1416,12 @@
 
     setInterval(updateClock, 1000);
     loadSavedSettings();
-    initKeepAwake();
   </script>
+
+  <!-- Keep-Silk-Open Script & Wake Lock Helper to prevent Echo/Silk timeout -->
+  <script>
+    var AlwaysUseSilk = true;
+  </script>
+  <script src="https://dagammla.gitlab.io/keep-silk-open/keep.js"></script>
 </body>
 </html>
