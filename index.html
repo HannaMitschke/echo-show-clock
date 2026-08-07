@@ -444,7 +444,6 @@
       gap: 4px;
     }
 
-    /* Subheading styling requested: all caps, not bold, with letter spacing */
     .section-category-title {
       font-size: 11px;
       font-weight: normal;
@@ -722,7 +721,7 @@
       <div class="section-category-title">
         <span>Weather</span>
         <label class="toggle-switch" title="Toggle Weather Display">
-          <input type="checkbox" id="show-weather-toggle" onchange="applySettings()">
+          <input type="checkbox" id="show-weather-toggle" onchange="applySettings()" disabled>
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -739,12 +738,15 @@
                 </svg>
               </button>
             </div>
+            <!-- Current Location button commented out per request -->
+            <!--
             <button onclick="requestGPSLocation()" style="padding: 0 8px; display: inline-flex; align-items: center; gap: 4px;" title="Use Current Location">
               Current Location
               <svg style="width: 12px; height: 12px; fill: #ffffff;" viewBox="0 0 24 24">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
               </svg>
             </button>
+            -->
           </div>
         </div>
         <div class="control-group">
@@ -1014,6 +1016,7 @@
             localStorage.setItem('echo_query', query);
             document.getElementById('city-input').value = query;
             
+            enableWeatherOption();
             document.getElementById('show-weather-toggle').checked = true;
             fetchWeather(savedLat, savedLon);
           } else {
@@ -1033,6 +1036,7 @@
                 localStorage.setItem('echo_query', query);
                 document.getElementById('city-input').value = query;
                 
+                enableWeatherOption();
                 document.getElementById('show-weather-toggle').checked = true;
                 fetchWeather(savedLat, savedLon);
               } else {
@@ -1049,6 +1053,8 @@
       document.getElementById('city-input').value = savedQuery;
     }
 
+    /* GPS Location function commented out per request */
+    /*
     function requestGPSLocation() {
       if ("geolocation" in navigator) {
         document.getElementById('weather-container').classList.remove('hidden-element');
@@ -1083,6 +1089,7 @@
                 localStorage.removeItem('echo_query');
               });
             
+            enableWeatherOption();
             document.getElementById('show-weather-toggle').checked = true;
             fetchWeather(savedLat, savedLon);
           },
@@ -1100,6 +1107,7 @@
         localStorage.removeItem('echo_query');
       }
     }
+    */
 
     function fetchWeather(lat, lon) {
       const unit = document.getElementById('temp-unit').value === 'C' ? 'celsius' : 'fahrenheit';
@@ -1266,7 +1274,10 @@
       }
 
       if (savedLat && savedLon) {
+        enableWeatherOption();
         fetchWeather(savedLat, savedLon);
+      } else {
+        disableWeatherOption();
       }
 
       applySettings();
