@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Echo Show Clock & Weather</title>
+  <title>Echo Show Clock</title>
   
-  <!-- Keep-Silk-Open Script -->
+  <!-- Browser Tab Clock Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>">
+
+  <!-- Keep-Silk-Open Script & Wake Lock Helper to prevent Echo/Silk timeout -->
   <script src="https://dagammla.gitlab.io/keep-silk-open/keep.js"></script>
   <script>var AlwaysUseSilk = true;</script>
 
@@ -26,14 +29,14 @@
       --subtext-color: rgba(255, 255, 255, 0.75);
       --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --card-bg: #111e14;
-      --control-height: 32px;
+      --control-height: 36px;
     }
 
     * { box-sizing: border-box; }
     body {
       background: var(--bg-style);
       background-size: 200% 200%;
-      animation: bgAnimation 20s ease infinite;
+      animation: bgAnimation 18s ease infinite;
       color: var(--digit-color);
       font-family: var(--system-font);
       display: flex;
@@ -275,31 +278,31 @@
 
     .hidden-element { display: none !important; }
 
-    /* Floating Top-Right Controls Container */
-    #top-right-controls {
+    /* Floating Bottom-Right Controls Container */
+    #bottom-controls {
       position: absolute;
-      top: 16px;
+      bottom: 16px;
       right: 16px;
       display: flex;
-      flex-direction: column;
+      flex-direction: column-reverse;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       z-index: 99;
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    #top-right-controls.visible {
+    #bottom-controls.visible {
       opacity: 1;
       visibility: visible;
     }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(18, 18, 18, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 54px;
+      height: 54px;
+      background: rgba(18, 18, 18, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -317,8 +320,8 @@
     }
 
     .icon-btn svg {
-      width: 18px;
-      height: 18px;
+      width: 26px;
+      height: 26px;
       stroke: #ffffff;
       fill: none;
       stroke-width: 2;
@@ -336,8 +339,8 @@
     .search-box-wrapper input {
       height: var(--control-height);
       border-radius: 5px !important;
-      padding: 0 32px 0 8px;
-      width: 85px;
+      padding: 0 52px 0 8px;
+      width: 130px;
     }
 
     .search-action-btn {
@@ -345,7 +348,7 @@
       right: 2px;
       top: 50%;
       transform: translateY(-50%);
-      background: #0066cc;
+      background: #63b3d6;
       border: none;
       color: #fff;
       cursor: pointer;
@@ -360,7 +363,7 @@
       transition: background 0.2s ease;
     }
     .search-action-btn:hover {
-      background: #0052a3;
+      background: #4da2c7;
     }
     .search-action-btn svg {
       width: 14px;
@@ -372,12 +375,42 @@
       stroke-linejoin: round;
     }
 
+    .search-clear-btn {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: #777;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 26px;
+      padding: 0;
+      margin: 0;
+    }
+    .search-clear-btn:hover {
+      color: #777;
+    }
+    .search-clear-btn svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     /* Settings Panel UI */
     #settings-panel {
       font-family: var(--system-font);
       position: absolute;
-      top: 16px;
-      right: 60px;
+      bottom: 82px;
+      right: 16px;
       background: rgba(18, 18, 18, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 12px 16px 12px 16px;
@@ -462,6 +495,16 @@
       align-items: center;
     }
 
+    /* Row Layout for Section Item Fields */
+    .settings-section.fields-row {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+    }
+
     .section-divider {
       width: 100%;
       height: 1px;
@@ -472,13 +515,25 @@
     .control-group {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
       gap: 2px;
       font-size: 10px;
       color: #aaa;
       letter-spacing: normal;
     }
 
-    /* Toggle Switch Component */
+    /* Centers toggle components vertically with inputs matching --control-height */
+    .control-group.centered-control {
+      justify-content: flex-end;
+    }
+
+    .toggle-wrapper {
+      height: var(--control-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .toggle-switch {
       position: relative;
       display: inline-block;
@@ -515,11 +570,25 @@
     }
 
     .toggle-switch input:checked + .toggle-slider {
-      background-color: #0066cc;
+      background-color: #63b3d6;
     }
 
     .toggle-switch input:checked + .toggle-slider:before {
       transform: translateX(14px);
+    }
+
+    /* Disabled toggle styling */
+    .toggle-switch input:disabled + .toggle-slider {
+      background-color: #383838;
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+    .toggle-switch input:disabled + .toggle-slider:before {
+      background-color: #bbb;
+    }
+    .toggle-switch:has(input:disabled),
+    .toggle-switch input:disabled + .toggle-slider {
+      cursor: not-allowed;
     }
 
     select, input[type="text"], input[type="color"], button, .standard-control {
@@ -539,19 +608,24 @@
 
     button {
       cursor: pointer;
-      background: #0066cc;
+      background: #333333;
       border: none;
       font-weight: bold;
       margin-top: auto;
       transition: background 0.2s ease;
     }
 
-    button:hover { background: #0052a3; }
+    button:hover { background: #444444; }
     input[type="color"] { padding: 0; width: 32px; height: var(--control-height); cursor: pointer; }
     select:disabled, input:disabled { opacity: 0.35; cursor: not-allowed; }
   </style>
 </head>
 <body>
+
+  <!-- Invisible Keep-Alive Video Element to prevent Silk Browser from timing out / sleeping -->
+  <video id="keep-awake-video" muted playsinline loop style="display:none; width:1px; height:1px; position:absolute; pointer-events:none;">
+    <source src="https://assets.mixkit.co/videos/preview/mixkit-solid-black-background-1215-large.mp4" type="video/mp4">
+  </video>
 
   <div id="clock-wrapper">
     <div id="time-container">
@@ -572,8 +646,8 @@
     </div>
   </div>
 
-  <!-- Top-Right Controls Container (Settings & Fullscreen Icons) -->
-  <div id="top-right-controls" class="visible">
+  <!-- Bottom-Right Controls Container -->
+  <div id="bottom-controls" class="visible">
     <!-- Settings Gear Icon -->
     <button id="settings-icon" class="icon-btn" onclick="toggleSettings(event)" title="Open Settings">
       <svg viewBox="0 0 24 24">
@@ -599,14 +673,18 @@
 
     <!-- Category 1: Clock -->
     <div class="settings-section-container">
-      <div class="section-category-title">Clock</div>
-      <div class="settings-section">
-        <div class="control-group">
+      <div class="section-category-title">
+        <span>Flip Clock</span>
+      </div>
+      <div class="settings-section fields-row">
+        <div class="control-group centered-control">
           <label>Flip Clock</label>
-          <select id="flip-style" onchange="applySettings()">
-            <option value="off">Off</option>
-            <option value="on">On</option>
-          </select>
+          <div class="toggle-wrapper">
+            <label class="toggle-switch" title="Toggle Flip Clock">
+              <input type="checkbox" id="flip-style-toggle" onchange="applySettings()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
         <div class="control-group">
           <label>Font</label>
@@ -630,12 +708,14 @@
             <option value="24">24-Hour</option>
           </select>
         </div>
-        <div class="control-group">
+        <div class="control-group centered-control">
           <label>Seconds</label>
-          <select id="show-seconds" onchange="applySettings()">
-            <option value="off">Hide</option>
-            <option value="on">Show</option>
-          </select>
+          <div class="toggle-wrapper">
+            <label class="toggle-switch" title="Toggle Seconds">
+              <input type="checkbox" id="show-seconds-toggle" onchange="applySettings()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -644,14 +724,18 @@
 
     <!-- Category 2: Appearance -->
     <div class="settings-section-container">
-      <div class="section-category-title">Appearance</div>
+      <div class="section-category-title">
+        <span>Night Mode</span>
+      </div>
       <div class="settings-section">
-        <div class="control-group">
+        <div class="control-group centered-control">
           <label>Night Mode</label>
-          <select id="night-mode" onchange="applySettings()">
-            <option value="off">Off</option>
-            <option value="on">On</option>
-          </select>
+          <div class="toggle-wrapper">
+            <label class="toggle-switch" title="Toggle Night Mode">
+              <input type="checkbox" id="night-mode-toggle" onchange="applySettings()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
         <div class="control-group">
           <label>Background</label>
@@ -670,7 +754,7 @@
           <input type="color" id="color2" value="#1c3121" oninput="applySettings()" onchange="applySettings()">
         </div>
         <div class="control-group">
-          <label>Digits Color</label>
+          <label>Text Color</label>
           <input type="color" id="digit-color-input" value="#ffffff" oninput="applySettings()" onchange="applySettings()">
         </div>
       </div>
@@ -697,19 +781,23 @@
             <option value="iso" id="opt-iso">YYYY-MM-DD</option>
           </select>
         </div>
-        <div class="control-group">
+        <div class="control-group centered-control">
           <label>Year</label>
-          <select id="show-year" onchange="applySettings()">
-            <option value="on">Show</option>
-            <option value="off">Hide</option>
-          </select>
+          <div class="toggle-wrapper">
+            <label class="toggle-switch" title="Toggle Year">
+              <input type="checkbox" id="show-year-toggle" onchange="applySettings()" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
-        <div class="control-group">
+        <div class="control-group centered-control">
           <label>Day Of Week</label>
-          <select id="show-day-week" onchange="applySettings()">
-            <option value="on">Show</option>
-            <option value="off">Hide</option>
-          </select>
+          <div class="toggle-wrapper">
+            <label class="toggle-switch" title="Toggle Day of Week">
+              <input type="checkbox" id="show-day-week-toggle" onchange="applySettings()" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -720,9 +808,9 @@
     <div class="settings-section-container">
       <div class="section-category-title">
         <span>Weather</span>
-        <label class="toggle-switch" title="Toggle Weather Display">
-          <input type="checkbox" id="show-weather-toggle" onchange="applySettings()" disabled>
-          <span class="toggle-slider"></span>
+        <label class="toggle-switch" title="Weather disabled until a zip code is searched">
+          <input type="checkbox" id="show-weather-toggle" onchange="applySettings()" disabled style="cursor: not-allowed;">
+          <span class="toggle-slider" style="cursor: not-allowed;"></span>
         </label>
       </div>
       <div class="settings-section">
@@ -730,7 +818,13 @@
           <label>Zip Code</label>
           <div style="display: flex; gap: 4px;">
             <div class="search-box-wrapper">
-              <input type="text" id="city-input" placeholder="" autocomplete="off" autocapitalize="none" spellcheck="false" style="width: 85px;" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeydown="if(event.key==='Enter'){commitWeatherSearch();}">
+              <input type="text" id="city-input" placeholder="" autocomplete="off" autocapitalize="none" spellcheck="false" oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateClearButtonVisibility();" onkeydown="if(event.key==='Enter'){commitWeatherSearch();}">
+              <button id="search-clear-btn" class="search-clear-btn hidden-element" onclick="clearWeatherSearch()" title="Clear Zip Code">
+                <svg viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
               <button class="search-action-btn" onclick="commitWeatherSearch()" title="Search Weather">
                 <svg viewBox="0 0 24 24">
                   <circle cx="11" cy="11" r="8"></circle>
@@ -738,15 +832,6 @@
                 </svg>
               </button>
             </div>
-            <!-- Current Location button commented out per request -->
-            <!--
-            <button onclick="requestGPSLocation()" style="padding: 0 8px; display: inline-flex; align-items: center; gap: 4px;" title="Use Current Location">
-              Current Location
-              <svg style="width: 12px; height: 12px; fill: #ffffff;" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-            </button>
-            -->
           </div>
         </div>
         <div class="control-group">
@@ -767,6 +852,37 @@
     let prevHour = '';
     let prevMinute = '';
     let prevSecond = '';
+
+    // Anti-timeout keeper for Amazon Echo Show / Silk browser
+    function initKeepAwake() {
+      const video = document.getElementById('keep-awake-video');
+      if (video) {
+        video.play().catch(() => {
+          // Autoplay policy fallback: play on first user interaction/click anywhere
+          document.addEventListener('click', () => {
+            video.play().catch(e => console.log("Keep-awake video play error:", e));
+          }, { once: true });
+        });
+      }
+      
+      // Secondary WakeLock API fallback if supported
+      if ('wakeLock' in navigator) {
+        let wakeLock = null;
+        async function requestWakeLock() {
+          try {
+            wakeLock = await navigator.wakeLock.request('screen');
+          } catch (err) {
+            console.log("Wake Lock error:", err);
+          }
+        }
+        requestWakeLock();
+        document.addEventListener('visibilitychange', () => {
+          if (wakeLock !== null && document.visibilityState === 'visible') {
+            requestWakeLock();
+          }
+        });
+      }
+    }
 
     function getMoonPhaseClass() {
       const d = new Date();
@@ -861,8 +977,8 @@
     function updateClock() {
       const now = new Date();
       const is12Hr = document.getElementById('time-format').value === '12';
-      const showSecs = document.getElementById('show-seconds').value === 'on';
-      const isFlip = document.getElementById('flip-style').value === 'on';
+      const showSecs = document.getElementById('show-seconds-toggle').checked;
+      const isFlip = document.getElementById('flip-style-toggle').checked;
 
       let hours = now.getHours();
       const ampm = (hours >= 12 ? 'PM' : 'AM').toUpperCase();
@@ -876,8 +992,8 @@
       const seconds = String(now.getSeconds()).padStart(2, '0');
 
       const dateFormat = document.getElementById('date-format').value;
-      const showYear = document.getElementById('show-year').value === 'on';
-      const showDayWeek = document.getElementById('show-day-week').value === 'on';
+      const showYear = document.getElementById('show-year-toggle').checked;
+      const showDayWeek = document.getElementById('show-day-week-toggle').checked;
 
       const optFull = document.getElementById('opt-full');
       const optNumeric = document.getElementById('opt-numeric');
@@ -992,9 +1108,34 @@
       }
     }
 
+    function updateClearButtonVisibility() {
+      const inputVal = document.getElementById('city-input').value;
+      const clearBtn = document.getElementById('search-clear-btn');
+      if (inputVal.length > 0) {
+        clearBtn.classList.remove('hidden-element');
+      } else {
+        clearBtn.classList.add('hidden-element');
+      }
+    }
+
+    function clearWeatherSearch() {
+      document.getElementById('city-input').value = '';
+      updateClearButtonVisibility();
+      commitWeatherSearch();
+    }
+
     function commitWeatherSearch() {
       const query = document.getElementById('city-input').value.trim();
-      if (!query) return;
+      updateClearButtonVisibility();
+      if (!query) {
+        savedLat = null;
+        savedLon = null;
+        localStorage.removeItem('echo_lat');
+        localStorage.removeItem('echo_lon');
+        localStorage.removeItem('echo_query');
+        disableWeatherOption();
+        return;
+      }
 
       document.getElementById('weather-container').classList.remove('hidden-element');
       document.getElementById('weather-temp').innerText = "Searching...";
@@ -1015,6 +1156,7 @@
             localStorage.setItem('echo_lon', savedLon);
             localStorage.setItem('echo_query', query);
             document.getElementById('city-input').value = query;
+            updateClearButtonVisibility();
             
             enableWeatherOption();
             document.getElementById('show-weather-toggle').checked = true;
@@ -1035,6 +1177,7 @@
                 localStorage.setItem('echo_lon', savedLon);
                 localStorage.setItem('echo_query', query);
                 document.getElementById('city-input').value = query;
+                updateClearButtonVisibility();
                 
                 enableWeatherOption();
                 document.getElementById('show-weather-toggle').checked = true;
@@ -1051,63 +1194,8 @@
     function revertCityInput() {
       const savedQuery = localStorage.getItem('echo_query') || '';
       document.getElementById('city-input').value = savedQuery;
+      updateClearButtonVisibility();
     }
-
-    /* GPS Location function commented out per request */
-    /*
-    function requestGPSLocation() {
-      if ("geolocation" in navigator) {
-        document.getElementById('weather-container').classList.remove('hidden-element');
-        document.getElementById('weather-temp').innerText = "Locating...";
-        document.getElementById('weather-icon-slot').innerHTML = '';
-        document.getElementById('moon-icon-slot').innerHTML = '';
-        
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            savedLat = pos.coords.latitude;
-            savedLon = pos.coords.longitude;
-            localStorage.setItem('echo_lat', savedLat);
-            localStorage.setItem('echo_lon', savedLon);
-            
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${savedLat}&lon=${savedLon}&zoom=10`)
-              .then(res => res.json())
-              .then(geoData => {
-                let postalCode = "";
-                if (geoData && geoData.address && geoData.address.postcode) {
-                  postalCode = geoData.address.postcode.replace(/[^0-9]/g, '');
-                }
-                if (postalCode) {
-                  document.getElementById('city-input').value = postalCode;
-                  localStorage.setItem('echo_query', postalCode);
-                } else {
-                  document.getElementById('city-input').value = '';
-                  localStorage.removeItem('echo_query');
-                }
-              })
-              .catch(() => {
-                document.getElementById('city-input').value = '';
-                localStorage.removeItem('echo_query');
-              });
-            
-            enableWeatherOption();
-            document.getElementById('show-weather-toggle').checked = true;
-            fetchWeather(savedLat, savedLon);
-          },
-          err => {
-            alert("Browser location permission was blocked or failed. Clearing ZIP code.");
-            document.getElementById('city-input').value = '';
-            localStorage.removeItem('echo_query');
-            disableWeatherOption();
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      } else {
-        alert("Geolocation not supported. Clearing ZIP code.");
-        document.getElementById('city-input').value = '';
-        localStorage.removeItem('echo_query');
-      }
-    }
-    */
 
     function fetchWeather(lat, lon) {
       const unit = document.getElementById('temp-unit').value === 'C' ? 'celsius' : 'fahrenheit';
@@ -1145,6 +1233,8 @@
       weatherAvailable = true;
       const weatherToggle = document.getElementById('show-weather-toggle');
       weatherToggle.disabled = false;
+      weatherToggle.style.cursor = 'pointer';
+      document.querySelector('.toggle-switch:has(#show-weather-toggle) .toggle-slider').style.cursor = 'pointer';
       applySettings();
     }
 
@@ -1153,17 +1243,22 @@
       document.documentElement.style.setProperty('--clock-font-family', fontVal[0]);
       document.documentElement.style.setProperty('--clock-font-weight', fontVal[1] || '700');
 
-      const nightMode = document.getElementById('night-mode').value;
+      const nightModeOn = document.getElementById('night-mode-toggle').checked;
       const digitColorInput = document.getElementById('digit-color-input');
       const bgTypeSelect = document.getElementById('bg-type');
       const color1Input = document.getElementById('color1');
       const color2Input = document.getElementById('color2');
+      const color1Label = document.getElementById('color1-label');
 
-      if (nightMode === 'on') {
+      // Keep Color 1 label as "Color 1" even if background is solid
+      color1Label.innerText = 'Color 1';
+
+      if (nightModeOn) {
         document.documentElement.style.setProperty('--bg-style', '#000000');
         document.documentElement.style.setProperty('--digit-color', '#660000');
         document.documentElement.style.setProperty('--subtext-color', 'rgba(102, 0, 0, 0.75)');
         document.documentElement.style.setProperty('--card-bg', '#050000');
+        color2Input.disabled = false;
       } else {
         document.documentElement.style.setProperty('--subtext-color', 'rgba(255, 255, 255, 0.75)');
         document.documentElement.style.setProperty('--card-bg', '#111e14');
@@ -1174,16 +1269,13 @@
         const bgType = bgTypeSelect.value;
         const c1 = color1Input.value;
         const c2 = color2Input.value;
-        const color1Label = document.getElementById('color1-label');
 
         let bgStyle = c1;
         if (bgType === 'solid') {
           color2Input.disabled = true;
-          color1Label.innerText = 'Color';
           bgStyle = c1;
         } else {
           color2Input.disabled = false;
-          color1Label.innerText = 'Color 1';
           if (bgType === 'gradient-linear') bgStyle = `linear-gradient(135deg, ${c1}, ${c2})`;
           else if (bgType === 'gradient-radial') bgStyle = `radial-gradient(circle at center, ${c1}, ${c2})`;
         }
@@ -1197,15 +1289,20 @@
       const weatherShow = document.getElementById('show-weather-toggle').checked && weatherAvailable;
       document.getElementById('weather-container').classList.toggle('hidden-element', !weatherShow);
       
-      localStorage.setItem('echo_night_mode', nightMode);
-      localStorage.setItem('echo_flip', document.getElementById('flip-style').value);
+      const flipOn = document.getElementById('flip-style-toggle').checked;
+      const secondsOn = document.getElementById('show-seconds-toggle').checked;
+      const yearOn = document.getElementById('show-year-toggle').checked;
+      const dayWeekOn = document.getElementById('show-day-week-toggle').checked;
+
+      localStorage.setItem('echo_night_mode', nightModeOn ? 'on' : 'off');
+      localStorage.setItem('echo_flip', flipOn ? 'on' : 'off');
       localStorage.setItem('echo_font', document.getElementById('font-select').value);
       localStorage.setItem('echo_format', document.getElementById('time-format').value);
-      localStorage.setItem('echo_seconds', document.getElementById('show-seconds').value);
+      localStorage.setItem('echo_seconds', secondsOn ? 'on' : 'off');
       localStorage.setItem('echo_date_toggle', dateShow ? 'on' : 'off');
       localStorage.setItem('echo_date_format', document.getElementById('date-format').value);
-      localStorage.setItem('echo_show_year', document.getElementById('show-year').value);
-      localStorage.setItem('echo_show_day_week', document.getElementById('show-day-week').value);
+      localStorage.setItem('echo_show_year', yearOn ? 'on' : 'off');
+      localStorage.setItem('echo_show_day_week', dayWeekOn ? 'on' : 'off');
       localStorage.setItem('echo_weather_toggle', weatherShow ? 'on' : 'off');
       localStorage.setItem('echo_temp_unit', document.getElementById('temp-unit').value);
       localStorage.setItem('echo_digit_color', digitColorInput.value);
@@ -1220,12 +1317,15 @@
     function loadSavedSettings() {
       if (localStorage.getItem('echo_font')) {
         if (localStorage.getItem('echo_night_mode')) {
-          document.getElementById('night-mode').value = localStorage.getItem('echo_night_mode');
+          document.getElementById('night-mode-toggle').checked = localStorage.getItem('echo_night_mode') === 'on';
         }
-        document.getElementById('flip-style').value = localStorage.getItem('echo_flip') || 'off';
+        document.getElementById('flip-style-toggle').checked = (localStorage.getItem('echo_flip') || 'off') === 'on';
         document.getElementById('font-select').value = localStorage.getItem('echo_font');
         document.getElementById('time-format').value = localStorage.getItem('echo_format');
-        document.getElementById('show-seconds').value = localStorage.getItem('echo_seconds');
+        
+        if (localStorage.getItem('echo_seconds')) {
+          document.getElementById('show-seconds-toggle').checked = localStorage.getItem('echo_seconds') === 'on';
+        }
         
         if (localStorage.getItem('echo_date_toggle')) {
           document.getElementById('show-date-toggle').checked = localStorage.getItem('echo_date_toggle') === 'on';
@@ -1237,10 +1337,10 @@
           document.getElementById('date-format').value = localStorage.getItem('echo_date_format');
         }
         if (localStorage.getItem('echo_show_year')) {
-          document.getElementById('show-year').value = localStorage.getItem('echo_show_year');
+          document.getElementById('show-year-toggle').checked = localStorage.getItem('echo_show_year') === 'on';
         }
         if (localStorage.getItem('echo_show_day_week')) {
-          document.getElementById('show-day-week').value = localStorage.getItem('echo_show_day_week');
+          document.getElementById('show-day-week-toggle').checked = localStorage.getItem('echo_day_week') === 'on' || localStorage.getItem('echo_show_day_week') === 'on';
         }
 
         if (localStorage.getItem('echo_weather_toggle')) {
@@ -1272,6 +1372,7 @@
       if (savedQuery) {
         document.getElementById('city-input').value = savedQuery;
       }
+      updateClearButtonVisibility();
 
       if (savedLat && savedLon) {
         enableWeatherOption();
@@ -1286,7 +1387,7 @@
     let controlHideTimer;
 
     function showControls() {
-      const controls = document.getElementById('top-right-controls');
+      const controls = document.getElementById('bottom-controls');
       controls.classList.add('visible');
       document.body.classList.remove('hide-cursor');
       resetControlHideTimer();
@@ -1295,7 +1396,7 @@
     function hideControls() {
       const panel = document.getElementById('settings-panel');
       if (panel.classList.contains('hidden')) {
-        const controls = document.getElementById('top-right-controls');
+        const controls = document.getElementById('bottom-controls');
         controls.classList.remove('visible');
         document.body.classList.add('hide-cursor');
       }
@@ -1355,6 +1456,7 @@
 
     setInterval(updateClock, 1000);
     loadSavedSettings();
+    initKeepAwake();
   </script>
 </body>
 </html>
