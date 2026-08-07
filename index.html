@@ -8,10 +8,10 @@
   <!-- Browser Tab Clock Icon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts - Loaded with full weight range for variable/slider support -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;700;900&family=Montserrat:wght@100;300;700;900&family=Orbitron:wght@400;700;900&family=Outfit:wght@100;300;700;900&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:wght@100..900&family=Orbitron:wght@400..900&family=Outfit:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap" rel="stylesheet">
 
   <!-- Weather Icons CSS (Erik Flowers) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
@@ -257,14 +257,14 @@
       gap: 1rem;
       color: var(--subtext-color);
       position: absolute;
-      top: calc(100% + 4rem);
+      top: calc(100% + 3.5rem);
       left: 50%;
       transform: translateX(-50%);
       width: max-content;
     }
 
     #date {
-      font-size: clamp(1rem, 2.1vw, 2.2rem);
+      font-size: clamp(1rem, 3vw, 2.2rem);
       color: var(--subtext-color);
       letter-spacing: 0.05em;
       font-weight: 500;
@@ -276,7 +276,7 @@
       align-items: center;
       justify-content: center;
       gap: 1rem;
-      font-size: clamp(1rem, 2.1vw, 2.2rem);
+      font-size: clamp(1rem, 3vw, 2.2rem);
       color: var(--subtext-color);
       font-weight: 500;
       line-height: 1;
@@ -607,7 +607,7 @@
       background-color: #bbb;
     }
 
-    select, input[type="text"], input[type="color"], input[type="time"], button, .standard-control {
+    select, input[type="text"], input[type="color"], input[type="time"], input[type="range"], button, .standard-control {
       font-family: var(--system-font);
       background: #2a2a2a;
       color: #fff;
@@ -620,6 +620,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      cursor: pointer;
+      accent-color: #63b3d6;
+      width: 110px;
     }
 
     button {
@@ -701,17 +708,17 @@
         <div class="control-group">
           <label>Font</label>
           <select id="font-select" onchange="applySettings()">
-            <option value="'Outfit', sans-serif|700">Outfit Bold</option>
-            <option value="'Outfit', sans-serif|100">Outfit Ultra Light</option>
-            <option value="'Inter', sans-serif|700">Inter Bold</option>
-            <option value="'Inter', sans-serif|100">Inter Thin</option>
-            <option value="'Montserrat', sans-serif|700">Montserrat Bold</option>
-            <option value="'Montserrat', sans-serif|100">Montserrat Hairline</option>
-            <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif|700'>System Bold</option>
-            <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif|300'>System Light</option>
-            <option value="'Orbitron', sans-serif|400">Digital Sci-Fi</option>
-            <option value="'Roboto Mono', monospace|300">Monospace Light</option>
+            <option value="'Outfit', sans-serif">Outfit</option>
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'>System</option>
+            <option value="'Orbitron', sans-serif">Orbitron</option>
+            <option value="'Roboto Mono', monospace">Roboto Mono</option>
           </select>
+        </div>
+        <div class="control-group">
+          <label>Font Weight</label>
+          <input type="range" id="font-weight-slider" min="100" max="900" step="50" value="700" oninput="applySettings()" onchange="applySettings()">
         </div>
         <div class="control-group">
           <label>Format</label>
@@ -1278,9 +1285,8 @@
     }
 
     function applySettings() {
-      const fontVal = document.getElementById('font-select').value.split('|');
-      let fontFamily = fontVal[0];
-      let fontWeight = fontVal[1] || '700';
+      const fontFamily = document.getElementById('font-select').value;
+      let fontWeight = document.getElementById('font-weight-slider').value;
 
       const nightScheduleOn = document.getElementById('night-schedule-toggle').checked;
       const nightToggle = document.getElementById('night-mode-toggle');
@@ -1352,7 +1358,8 @@
       localStorage.setItem('echo_night_start', nightStartVal);
       localStorage.setItem('echo_night_end', nightEndVal);
       localStorage.setItem('echo_flip', flipOn ? 'on' : 'off');
-      localStorage.setItem('echo_font', document.getElementById('font-select').value);
+      localStorage.setItem('echo_font', fontFamily);
+      localStorage.setItem('echo_font_weight', fontWeight);
       localStorage.setItem('echo_format', document.getElementById('time-format').value);
       localStorage.setItem('echo_seconds', secondsOn ? 'on' : 'off');
       localStorage.setItem('echo_date_toggle', document.getElementById('show-date-toggle').checked ? 'on' : 'off');
@@ -1387,6 +1394,16 @@
 
         document.getElementById('flip-style-toggle').checked = (localStorage.getItem('echo_flip') || 'off') === 'on';
         document.getElementById('font-select').value = localStorage.getItem('echo_font');
+        
+        if (localStorage.getItem('echo_font_weight')) {
+          document.getElementById('font-weight-slider').value = localStorage.getItem('echo_font_weight');
+        } else if (localStorage.getItem('echo_font') && localStorage.getItem('echo_font').includes('|')) {
+          // Backward compatibility fallback if old storage existed
+          let parts = localStorage.getItem('echo_font').split('|');
+          document.getElementById('font-select').value = parts[0];
+          if (parts[1]) document.getElementById('font-weight-slider').value = parts[1];
+        }
+
         document.getElementById('time-format').value = localStorage.getItem('echo_format');
         
         if (localStorage.getItem('echo_seconds')) {
