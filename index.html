@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;700&family=Montserrat:wght@100;300;700&family=Orbitron:wght@400;700&family=Outfit:wght@100;300;700&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;700;900&family=Montserrat:wght@100;300;700;900&family=Orbitron:wght@400;700;900&family=Outfit:wght@100;300;700;900&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
 
   <!-- Weather Icons CSS (Erik Flowers) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
@@ -55,14 +55,17 @@
       cursor: none;
     }
 
-    /* Fixed Layout Outer Container */
+    /* Fixed Layout Outer Container - Centered Exactly */
     #clock-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       width: 100vw;
-      height: 100vh;
     }
 
     /* Standard Digital Clock View - Scaled Up */
@@ -71,7 +74,6 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 52vh;
     }
 
     #time {
@@ -80,7 +82,7 @@
       font-size: 19vw;
       color: var(--digit-color);
       line-height: 1;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.0em;
       text-align: center;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -104,37 +106,35 @@
       justify-content: center;
       gap: 2vw;
       width: 100%;
-      max-height: 66vh;
     }
 
     .flip-card {
       position: relative;
       width: 27vw;
-      max-width: 320px;
+      max-width: 300px;
       aspect-ratio: 0.75;
-      max-height: 60vh;
       background: var(--card-bg);
       border-radius: 1.5vw;
       box-shadow: 0 12px 30px rgba(0,0,0,0.5);
       flex-shrink: 1;
+      perspective: 400px;
     }
 
     .has-seconds .flip-card {
       width: 20vw;
-      max-width: 235px;
+      max-width: 215px;
       aspect-ratio: 0.75;
-      max-height: 54vh;
       border-radius: 1.2vw;
     }
 
     .flip-card .ampm-badge {
       position: absolute;
-      top: 1rem;
+      bottom: 1rem;
       left: 1.2rem;
-      font-size: clamp(0.85rem, 2.2vw, 1.6rem);
+      font-size: clamp(1rem, 2.8vw, 2rem);
       font-weight: 700;
       color: var(--digit-color);
-      opacity: 0.75;
+      opacity: 0.85;
       font-family: var(--system-font);
       letter-spacing: 0.04em;
       z-index: 30;
@@ -142,8 +142,8 @@
     }
 
     .has-seconds .flip-card .ampm-badge {
-      font-size: clamp(0.75rem, 1.6vw, 1.3rem);
-      top: 0.8rem;
+      font-size: clamp(0.85rem, 2vw, 1.6rem);
+      bottom: 0.8rem;
       left: 1rem;
     }
 
@@ -154,18 +154,22 @@
       height: 50%;
       overflow: hidden;
       background: var(--card-bg);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
 
     .card-half.top {
       top: 0;
       border-top-left-radius: inherit;
       border-top-right-radius: inherit;
+      transform-origin: bottom;
     }
 
     .card-half.bottom {
       bottom: 0;
       border-bottom-left-radius: inherit;
       border-bottom-right-radius: inherit;
+      transform-origin: top;
     }
 
     .digit {
@@ -178,18 +182,20 @@
       justify-content: center;
       font-family: var(--clock-font-family);
       font-weight: var(--clock-font-weight);
-      font-size: clamp(4.5rem, 17vw, 16rem);
+      font-size: clamp(3.5rem, 13vw, 13rem);
       color: var(--digit-color);
       line-height: 1;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       font-variant-numeric: tabular-nums;
       -webkit-font-feature-settings: "tnum";
       font-feature-settings: "tnum";
-      text-indent: 0.04em;
+      padding: 0 8%;
+      will-change: transform;
     }
 
     .has-seconds .digit {
-      font-size: clamp(3.2rem, 12.5vw, 11.5rem);
+      font-size: clamp(2.5rem, 9.5vw, 9rem);
+      padding: 0 6%;
     }
 
     .card-half.top .digit { top: 0; }
@@ -209,37 +215,56 @@
 
     .top-static { z-index: 1; }
     .bottom-static { z-index: 1; }
-    .top-flip { z-index: 2; transform-origin: bottom; }
-    .bottom-flip { z-index: 2; transform-origin: top; transform: scaleY(0); }
+    
+    .top-flip { 
+      z-index: 3; 
+      transform-origin: bottom; 
+      transform: rotateX(0deg);
+    }
+    
+    .bottom-flip { 
+      z-index: 2; 
+      transform-origin: top; 
+      transform: rotateX(90deg);
+    }
 
-    .flip-card.flipping .top-flip { animation: flipTop 0.25s ease-in forwards; }
-    .flip-card.flipping .bottom-flip { animation: flipBottom 0.25s ease-out 0.25s forwards; }
+    /* Snappier, hardware-accelerated flip animation using rotateX */
+    .flip-card.flipping .top-flip { 
+      animation: flipTop 0.2s cubic-bezier(0.3, 0, 0.1, 1) forwards; 
+    }
+    
+    .flip-card.flipping .bottom-flip { 
+      animation: flipBottom 0.2s cubic-bezier(0.3, 0, 0.1, 1) 0.2s forwards; 
+    }
 
     @keyframes flipTop {
-      0% { transform: scaleY(1); }
-      100% { transform: scaleY(0); }
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(-90deg); }
     }
 
     @keyframes flipBottom {
-      0% { transform: scaleY(0); }
-      100% { transform: scaleY(1); }
+      0% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
     }
 
-    /* Sub-info UI - Increased font sizes */
+    /* Sub-info UI */
     #sub-info {
       font-family: var(--system-font);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.8rem;
-      margin-top: 1.4rem;
-      min-height: 6rem;
+      gap: 1rem;
       color: var(--subtext-color);
+      position: absolute;
+      top: calc(100% + 4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
     }
 
     #date {
-      font-size: clamp(1.4rem, 3vw, 3.2rem);
+      font-size: clamp(1rem, 2.1vw, 2.2rem);
       color: var(--subtext-color);
       letter-spacing: 0.05em;
       font-weight: 500;
@@ -250,8 +275,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 1.2rem;
-      font-size: clamp(1.4rem, 3vw, 3rem);
+      gap: 1rem;
+      font-size: clamp(1rem, 2.1vw, 2.2rem);
       color: var(--subtext-color);
       font-weight: 500;
       line-height: 1;
@@ -268,7 +293,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1.6rem, 3.5vw, 3.6rem);
+      font-size: clamp(1.4rem, 3vw, 3.2rem);
       line-height: 1;
     }
 
@@ -530,11 +555,6 @@
       width: 100%;
     }
 
-    .section-category-title .toggle-switch {
-      display: inline-block;
-      vertical-align: middle;
-    }
-
     .toggle-switch {
       position: relative;
       display: inline-block;
@@ -585,10 +605,6 @@
     }
     .toggle-switch input:disabled + .toggle-slider:before {
       background-color: #bbb;
-    }
-    .toggle-switch:has(input:disabled),
-    .toggle-switch input:disabled + .toggle-slider {
-      cursor: not-allowed;
     }
 
     select, input[type="text"], input[type="color"], input[type="time"], button, .standard-control {
@@ -760,7 +776,7 @@
       </div>
       <div class="settings-section">
         <div class="control-group centered-control">
-          <label>Auto Schedule</label>
+          <label>Schedule</label>
           <div class="toggle-wrapper">
             <label class="toggle-switch" title="Toggle Scheduled Night Mode">
               <input type="checkbox" id="night-schedule-toggle" onchange="applySettings()">
@@ -769,11 +785,11 @@
           </div>
         </div>
         <div class="control-group">
-          <label>Night Start</label>
+          <label>Start Time</label>
           <input type="time" id="night-start-time" value="22:00" onchange="applySettings()">
         </div>
         <div class="control-group">
-          <label>Night End</label>
+          <label>End Time</label>
           <input type="time" id="night-end-time" value="07:00" onchange="applySettings()">
         </div>
       </div>
@@ -801,19 +817,19 @@
           </select>
         </div>
         <div class="control-group centered-control">
-          <label>Year</label>
+          <label>Day Of Week</label>
           <div class="toggle-wrapper">
-            <label class="toggle-switch" title="Toggle Year">
-              <input type="checkbox" id="show-year-toggle" onchange="applySettings()" checked>
+            <label class="toggle-switch" title="Toggle Day of Week">
+              <input type="checkbox" id="show-day-week-toggle" onchange="applySettings()" checked>
               <span class="toggle-slider"></span>
             </label>
           </div>
         </div>
         <div class="control-group centered-control">
-          <label>Day Of Week</label>
+          <label>Year</label>
           <div class="toggle-wrapper">
-            <label class="toggle-switch" title="Toggle Day of Week">
-              <input type="checkbox" id="show-day-week-toggle" onchange="applySettings()" checked>
+            <label class="toggle-switch" title="Toggle Year">
+              <input type="checkbox" id="show-year-toggle" onchange="applySettings()" checked>
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -959,14 +975,13 @@
 
       setTimeout(() => {
         bottomStatic.innerText = newVal;
-      }, 500);
+      }, 220);
     }
 
     function checkNightSchedule() {
       const scheduleOn = document.getElementById('night-schedule-toggle').checked;
       const nightToggle = document.getElementById('night-mode-toggle');
       
-      // Control disabled state of the manual night mode toggle based on schedule
       nightToggle.disabled = scheduleOn;
 
       if (!scheduleOn) return;
@@ -1264,14 +1279,22 @@
 
     function applySettings() {
       const fontVal = document.getElementById('font-select').value.split('|');
-      document.documentElement.style.setProperty('--clock-font-family', fontVal[0]);
-      document.documentElement.style.setProperty('--clock-font-weight', fontVal[1] || '700');
+      let fontFamily = fontVal[0];
+      let fontWeight = fontVal[1] || '700';
 
       const nightScheduleOn = document.getElementById('night-schedule-toggle').checked;
       const nightToggle = document.getElementById('night-mode-toggle');
       nightToggle.disabled = nightScheduleOn;
 
       const nightModeOn = nightToggle.checked;
+
+      if (nightModeOn) {
+        fontWeight = '800';
+      }
+
+      document.documentElement.style.setProperty('--clock-font-family', fontFamily);
+      document.documentElement.style.setProperty('--clock-font-weight', fontWeight);
+
       const digitColorInput = document.getElementById('digit-color-input');
       const bgTypeSelect = document.getElementById('bg-type');
       const color1Input = document.getElementById('color1');
@@ -1313,7 +1336,6 @@
       const nightStartVal = document.getElementById('night-start-time').value;
       const nightEndVal = document.getElementById('night-end-time').value;
 
-      // Clear date and weather when in night mode[cite: 6]
       const dateShow = nightModeOn ? false : document.getElementById('show-date-toggle').checked;
       document.getElementById('date').classList.toggle('hidden-element', !dateShow);
 
