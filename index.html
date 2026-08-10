@@ -1286,7 +1286,7 @@
 
     function applySettings() {
       const fontFamily = document.getElementById('font-select').value;
-      let fontWeight = document.getElementById('font-weight-slider').value;
+      const userSliderWeight = document.getElementById('font-weight-slider').value;
 
       const nightScheduleOn = document.getElementById('night-schedule-toggle').checked;
       const nightToggle = document.getElementById('night-mode-toggle');
@@ -1294,12 +1294,11 @@
 
       const nightModeOn = nightToggle.checked;
 
-      if (nightModeOn) {
-        fontWeight = '800';
-      }
+      // Apply night mode weight temporarily, or revert back to user slider setting
+      const activeFontWeight = nightModeOn ? '800' : userSliderWeight;
 
       document.documentElement.style.setProperty('--clock-font-family', fontFamily);
-      document.documentElement.style.setProperty('--clock-font-weight', fontWeight);
+      document.documentElement.style.setProperty('--clock-font-weight', activeFontWeight);
 
       const digitColorInput = document.getElementById('digit-color-input');
       const bgTypeSelect = document.getElementById('bg-type');
@@ -1359,7 +1358,7 @@
       localStorage.setItem('echo_night_end', nightEndVal);
       localStorage.setItem('echo_flip', flipOn ? 'on' : 'off');
       localStorage.setItem('echo_font', fontFamily);
-      localStorage.setItem('echo_font_weight', fontWeight);
+      localStorage.setItem('echo_font_weight', userSliderWeight); // Keep pre-night-mode weight in localStorage
       localStorage.setItem('echo_format', document.getElementById('time-format').value);
       localStorage.setItem('echo_seconds', secondsOn ? 'on' : 'off');
       localStorage.setItem('echo_date_toggle', document.getElementById('show-date-toggle').checked ? 'on' : 'off');
@@ -1539,6 +1538,13 @@
 
     setInterval(updateClock, 1000);
     loadSavedSettings();
+
+    // Automatically update weather every 5 minutes
+    setInterval(() => {
+      if (savedLat && savedLon && weatherAvailable) {
+        fetchWeather(savedLat, savedLon);
+      }
+    }, 5 * 60 * 1000);
   </script>
 
   <!-- Keep-Silk-Open Script & Wake Lock Helper to prevent Echo/Silk timeout -->
