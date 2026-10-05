@@ -8,7 +8,7 @@
   <!-- Browser Tab Clock Icon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>">
 
-  <!-- Google Fonts - Loaded with full weight range for variable/slider support -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:wght@100..900&family=Orbitron:wght@400..900&family=Outfit:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap" rel="stylesheet">
@@ -26,6 +26,8 @@
       --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --card-bg: #111e14;
       --control-height: 36px;
+      --clock-scale: 1;
+      --subinfo-scale: 1;
     }
 
     * { box-sizing: border-box; }
@@ -35,14 +37,12 @@
       animation: bgAnimation 18s ease infinite;
       color: var(--digit-color);
       font-family: var(--system-font);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
+      width: 100vw;
       margin: 0;
       overflow: hidden;
       user-select: none;
+      position: relative;
     }
 
     @keyframes bgAnimation {
@@ -55,25 +55,99 @@
       cursor: none;
     }
 
-    /* Fixed Layout Outer Container - Centered Exactly */
-    #clock-wrapper {
+    /* Alignment Snap Guides */
+    .snap-line {
       position: absolute;
+      background-color: #63b3d6;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      box-shadow: 0 0 8px rgba(99, 179, 214, 0.8);
+    }
+    #snap-line-h {
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      left: 0;
       width: 100vw;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+    #snap-line-v {
+      left: 50%;
+      top: 0;
+      height: 100vh;
+      width: 2px;
+      transform: translateX(-50%);
+    }
+    .snap-line.visible {
+      opacity: 1;
     }
 
-    /* Standard Digital Clock View - Scaled Up */
-    #time-container {
+    /* Draggable Target Base */
+    .draggable {
+      position: absolute;
+      cursor: move;
+      touch-action: none;
+      z-index: 10;
+      padding: 10px;
+      border: 1px dashed transparent;
+      transition: border-color 0.2s ease;
+      border-radius: 12px;
+    }
+
+    .draggable:hover, .draggable.is-active {
+      border-color: rgba(99, 179, 214, 0.4);
+    }
+
+    /* Resize Handle Controls */
+    .resize-handle {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 24px;
+      height: 24px;
+      background: #63b3d6;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      cursor: nwse-resize;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      touch-action: none;
+    }
+
+    .resize-handle::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: translate(-1px, -1px);
+    }
+
+    .draggable:hover .resize-handle, 
+    .draggable.is-active .resize-handle {
+      opacity: 1;
+    }
+
+    .resize-handle:hover {
+      transform: scale(1.25);
+      background: #4da2c7;
+    }
+
+    /* Standard Digital Clock View */
+    #time-container {
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(var(--clock-scale));
+      transform-origin: center center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-shadow: 0 4px 30px rgba(0,0,0,0.2);
     }
 
@@ -89,6 +163,7 @@
       font-variant-numeric: tabular-nums;
       -webkit-font-feature-settings: "tnum";
       font-feature-settings: "tnum";
+      pointer-events: none;
     }
 
     #time .ampm-text {
@@ -100,13 +175,13 @@
       letter-spacing: 0.04em;
     }
 
-    /* Flip Clock Container - Bigger for Echo Show 5 */
+    /* Flip Clock Container */
     .flip-clock-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 2vw;
-      width: 100%;
+      pointer-events: none;
     }
 
     .flip-card {
@@ -230,7 +305,6 @@
       transform: rotateX(90deg);
     }
 
-    /* Snappier, hardware-accelerated flip animation using rotateX */
     .flip-card.flipping .top-flip { 
       animation: flipTop 0.2s cubic-bezier(0.3, 0, 0.1, 1) forwards; 
     }
@@ -251,6 +325,10 @@
 
     /* Sub-info UI */
     #sub-info {
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(var(--subinfo-scale));
+      transform-origin: center center;
       font-family: var(--system-font);
       display: flex;
       flex-direction: column;
@@ -258,10 +336,6 @@
       justify-content: center;
       gap: 1rem;
       color: var(--subtext-color);
-      position: absolute;
-      top: calc(100% + 3.5rem);
-      left: 50%;
-      transform: translateX(-50%);
       width: max-content;
     }
 
@@ -271,6 +345,7 @@
       letter-spacing: 0.05em;
       font-weight: 500;
       text-transform: uppercase;
+      pointer-events: none;
     }
 
     #weather-container {
@@ -283,6 +358,7 @@
       font-weight: 500;
       line-height: 1;
       text-transform: uppercase;
+      pointer-events: none;
     }
 
     .weather-group {
@@ -385,9 +461,7 @@
       margin: 0;
       transition: background 0.2s ease;
     }
-    .search-action-btn:hover {
-      background: #4da2c7;
-    }
+    .search-action-btn:hover { background: #4da2c7; }
     .search-action-btn svg {
       width: 14px;
       height: 14px;
@@ -415,9 +489,7 @@
       padding: 0;
       margin: 0;
     }
-    .search-clear-btn:hover {
-      color: #777;
-    }
+    .search-clear-btn:hover { color: #777; }
     .search-clear-btn svg {
       width: 12px;
       height: 12px;
@@ -628,7 +700,7 @@
       padding: 0;
       cursor: pointer;
       accent-color: #63b3d6;
-      width: 110px;
+      width: 100px;
     }
 
     button {
@@ -636,7 +708,6 @@
       background: #333333;
       border: none;
       font-weight: bold;
-      margin-top: auto;
       transition: background 0.2s ease;
     }
 
@@ -648,28 +719,35 @@
 </head>
 
 <body>
-  <div id="clock-wrapper">
-    <div id="time-container">
+  <!-- Center Snap Guidelines -->
+  <div id="snap-line-h" class="snap-line"></div>
+  <div id="snap-line-v" class="snap-line"></div>
+
+  <!-- Draggable & Resizable Clock Container -->
+  <div id="time-container" class="draggable">
+    <div id="time-content">
       <div id="time">12:00 <span class="ampm-text">PM</span></div>
     </div>
+    <div class="resize-handle" title="Drag to Resize Clock"></div>
+  </div>
 
-    <div id="sub-info">
-      <div id="date">Loading date...</div>
-      <div id="weather-container" class="hidden-element">
-        <div class="weather-group">
-          <span id="weather-icon-slot"></span>
-          <span id="weather-temp">--°</span>
-        </div>
-        <div class="weather-group" title="Current Moon Phase">
-          <span id="moon-icon-slot"></span>
-        </div>
+  <!-- Draggable & Resizable Date & Weather Sub-Info -->
+  <div id="sub-info" class="draggable">
+    <div id="date">Loading date...</div>
+    <div id="weather-container" class="hidden-element">
+      <div class="weather-group">
+        <span id="weather-icon-slot"></span>
+        <span id="weather-temp">--°</span>
+      </div>
+      <div class="weather-group" title="Current Moon Phase">
+        <span id="moon-icon-slot"></span>
       </div>
     </div>
+    <div class="resize-handle" title="Drag to Resize Sub-Info"></div>
   </div>
 
   <!-- Bottom-Right Controls Container -->
   <div id="bottom-controls" class="visible">
-    <!-- Settings Gear Icon -->
     <button id="settings-icon" class="icon-btn" onclick="toggleSettings(event)" title="Open Settings">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3"></circle>
@@ -677,7 +755,6 @@
       </svg>
     </button>
 
-    <!-- Fullscreen Icon Button -->
     <button class="icon-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
       <svg viewBox="0 0 24 24">
         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -692,7 +769,7 @@
       <button id="close-settings" onclick="closeSettings()" title="Close Settings">&#x2715;</button>
     </div>
 
-    <!-- Category 1: Clock -->
+    <!-- Category 1: Clock Styling -->
     <div class="settings-section-container">
       <div class="section-category-title">
         <span>Clock</span>
@@ -806,10 +883,10 @@
 
     <div class="section-divider"></div>
 
-    <!-- Category 4: Date -->
+    <!-- Category 4: Date & Sub-Info Display -->
     <div class="settings-section-container">
       <div class="section-category-title">
-        <span>Date</span>
+        <span>Date & Weather Display</span>
         <label class="toggle-switch" title="Toggle Date Display">
           <input type="checkbox" id="show-date-toggle" onchange="applySettings()" checked>
           <span class="toggle-slider"></span>
@@ -896,6 +973,175 @@
     let prevHour = '';
     let prevMinute = '';
     let prevSecond = '';
+
+    const snapLineH = document.getElementById('snap-line-h');
+    const snapLineV = document.getElementById('snap-line-v');
+
+    function makeDraggableAndResizable(el, storagePrefix, cssProp) {
+      let isDragging = false;
+      let isResizing = false;
+      let startX, startY;
+      let initialLeft, initialTop;
+      let initialScale = 1;
+      let initialDist = 0;
+
+      // Load Saved Scale First
+      const savedScale = localStorage.getItem('echo_' + storagePrefix + '_scale');
+      if (savedScale) {
+        document.documentElement.style.setProperty(cssProp, savedScale);
+      }
+
+      // Load Saved Position
+      const savedPos = localStorage.getItem(storagePrefix + '_pos');
+      if (savedPos) {
+        try {
+          const { left, top } = JSON.parse(savedPos);
+          el.style.left = left;
+          el.style.top = top;
+        } catch(e) {}
+      }
+
+      function getClientCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      function onPointerDown(e) {
+        if (e.target.closest('#settings-panel') || e.target.closest('#bottom-controls')) return;
+
+        const isHandle = e.target.classList.contains('resize-handle') || e.target.closest('.resize-handle');
+
+        if (isHandle) {
+          isResizing = true;
+          el.classList.add('is-active');
+          const coords = getClientCoords(e);
+          startX = coords.x;
+          startY = coords.y;
+          const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(cssProp)) || 1;
+          initialScale = currentScale;
+
+          window.addEventListener('mousemove', onPointerMove);
+          window.addEventListener('mouseup', onPointerUp);
+          window.addEventListener('touchmove', onPointerMove, { passive: false });
+          window.addEventListener('touchend', onPointerUp);
+          e.stopPropagation();
+          e.preventDefault();
+          return;
+        }
+
+        // Touch Pinch Gesture
+        if (e.touches && e.touches.length === 2) {
+          isResizing = true;
+          el.classList.add('is-active');
+          initialDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initialScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(cssProp)) || 1;
+          
+          window.addEventListener('touchmove', onPointerMove, { passive: false });
+          window.addEventListener('touchend', onPointerUp);
+          return;
+        }
+
+        isDragging = true;
+        el.classList.add('is-active');
+        const coords = getClientCoords(e);
+        startX = coords.x;
+        startY = coords.y;
+
+        const rect = el.getBoundingClientRect();
+        initialLeft = rect.left + rect.width / 2;
+        initialTop = rect.top + rect.height / 2;
+
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        window.addEventListener('touchmove', onPointerMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (isResizing) {
+          let newScale = initialScale;
+          if (e.touches && e.touches.length === 2) {
+            const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const factor = dist / initialDist;
+            newScale = Math.min(Math.max(initialScale * factor, 0.4), 2.5);
+          } else {
+            const coords = getClientCoords(e);
+            const dx = coords.x - startX;
+            const dy = coords.y - startY;
+            const delta = (dx + dy) / 2;
+            const factor = 1 + (delta / 200);
+            newScale = Math.min(Math.max(initialScale * factor, 0.4), 2.5);
+          }
+
+          document.documentElement.style.setProperty(cssProp, newScale.toFixed(2));
+          localStorage.setItem('echo_' + storagePrefix + '_scale', newScale.toFixed(2));
+          return;
+        }
+
+        if (!isDragging) return;
+        const coords = getClientCoords(e);
+
+        const dx = coords.x - startX;
+        const dy = coords.y - startY;
+
+        let newLeft = ((initialLeft + dx) / window.innerWidth) * 100;
+        let newTop = ((initialTop + dy) / window.innerHeight) * 100;
+
+        // Snap Threshold (Snap within 3% of center)
+        const snapThreshold = 3;
+        let snappedX = false;
+        let snappedY = false;
+
+        if (Math.abs(newLeft - 50) < snapThreshold) {
+          newLeft = 50;
+          snappedX = true;
+        }
+        if (Math.abs(newTop - 50) < snapThreshold) {
+          newTop = 50;
+          snappedY = true;
+        }
+
+        if (snappedX) snapLineV.classList.add('visible');
+        else snapLineV.classList.remove('visible');
+
+        if (snappedY) snapLineH.classList.add('visible');
+        else snapLineH.classList.remove('visible');
+
+        el.style.left = `${newLeft}%`;
+        el.style.top = `${newTop}%`;
+      }
+
+      function onPointerUp() {
+        if (!isDragging && !isResizing) return;
+        isDragging = false;
+        isResizing = false;
+        el.classList.remove('is-active');
+
+        snapLineH.classList.remove('visible');
+        snapLineV.classList.remove('visible');
+
+        window.removeEventListener('mousemove', onPointerMove);
+        window.removeEventListener('mouseup', onPointerUp);
+        window.removeEventListener('touchmove', onPointerMove);
+        window.removeEventListener('touchend', onPointerUp);
+
+        localStorage.setItem(storagePrefix + '_pos', JSON.stringify({
+          left: el.style.left,
+          top: el.style.top
+        }));
+      }
+
+      el.addEventListener('mousedown', onPointerDown);
+      el.addEventListener('touchstart', onPointerDown, { passive: false });
+    }
 
     function getMoonPhaseClass() {
       const d = new Date();
@@ -1094,7 +1340,7 @@
       document.getElementById('date').innerText = (dayNameStr + formattedDate).toUpperCase();
       document.getElementById('moon-icon-slot').innerHTML = `<i class="wi ${getMoonPhaseClass()}"></i>`;
 
-      const timeContainer = document.getElementById('time-container');
+      const timeContent = document.getElementById('time-content');
 
       if (isFlip) {
         const hourVal = String(hours);
@@ -1102,7 +1348,7 @@
         const secVal = seconds;
 
         const hasSecClass = showSecs ? 'has-seconds' : '';
-        const currentWrap = document.querySelector('.flip-clock-wrap');
+        const currentWrap = timeContent.querySelector('.flip-clock-wrap');
         
         if (!currentWrap || currentWrap.classList.contains('has-seconds') !== showSecs) {
           let wrapHTML = `<div class="flip-clock-wrap ${hasSecClass}">`;
@@ -1110,7 +1356,7 @@
           wrapHTML += createFlipCardHTML('flip-min');
           if (showSecs) wrapHTML += createFlipCardHTML('flip-sec');
           wrapHTML += `</div>`;
-          timeContainer.innerHTML = wrapHTML;
+          timeContent.innerHTML = wrapHTML;
 
           document.querySelectorAll('#flip-hour .digit').forEach(e => e.innerText = hourVal);
           document.querySelectorAll('#flip-min .digit').forEach(e => e.innerText = minVal);
@@ -1152,7 +1398,7 @@
         if (showSecs) timeStr += `:${seconds}`;
         const ampmHTML = is12Hr ? `<span class="ampm-text">${ampm}</span>` : '';
 
-        timeContainer.innerHTML = `<div id="time">${timeStr}${ampmHTML}</div>`;
+        timeContent.innerHTML = `<div id="time">${timeStr}${ampmHTML}</div>`;
       }
     }
 
@@ -1296,8 +1542,6 @@
       nightToggle.disabled = nightScheduleOn;
 
       const nightModeOn = nightToggle.checked;
-
-      // Apply night mode weight temporarily, or revert back to user slider setting
       const activeFontWeight = nightModeOn ? '800' : userSliderWeight;
 
       document.documentElement.style.setProperty('--clock-font-family', fontFamily);
@@ -1361,7 +1605,7 @@
       localStorage.setItem('echo_night_end', nightEndVal);
       localStorage.setItem('echo_flip', flipOn ? 'on' : 'off');
       localStorage.setItem('echo_font', fontFamily);
-      localStorage.setItem('echo_font_weight', userSliderWeight); // Keep pre-night-mode weight in localStorage
+      localStorage.setItem('echo_font_weight', userSliderWeight);
       localStorage.setItem('echo_format', document.getElementById('time-format').value);
       localStorage.setItem('echo_seconds', secondsOn ? 'on' : 'off');
       localStorage.setItem('echo_date_toggle', document.getElementById('show-date-toggle').checked ? 'on' : 'off');
@@ -1375,7 +1619,6 @@
       localStorage.setItem('echo_c1', color1Input.value);
       localStorage.setItem('echo_c2', color2Input.value);
 
-      document.getElementById('time-container').innerHTML = '';
       updateClock();
     }
 
@@ -1399,11 +1642,6 @@
         
         if (localStorage.getItem('echo_font_weight')) {
           document.getElementById('font-weight-slider').value = localStorage.getItem('echo_font_weight');
-        } else if (localStorage.getItem('echo_font') && localStorage.getItem('echo_font').includes('|')) {
-          // Backward compatibility fallback if old storage existed
-          let parts = localStorage.getItem('echo_font').split('|');
-          document.getElementById('font-select').value = parts[0];
-          if (parts[1]) document.getElementById('font-weight-slider').value = parts[1];
         }
 
         document.getElementById('time-format').value = localStorage.getItem('echo_format');
@@ -1414,8 +1652,6 @@
         
         if (localStorage.getItem('echo_date_toggle')) {
           document.getElementById('show-date-toggle').checked = localStorage.getItem('echo_date_toggle') === 'on';
-        } else if (localStorage.getItem('echo_date')) {
-          document.getElementById('show-date-toggle').checked = localStorage.getItem('echo_date') === 'on';
         }
 
         if (localStorage.getItem('echo_date_format')) {
@@ -1425,13 +1661,11 @@
           document.getElementById('show-year-toggle').checked = localStorage.getItem('echo_show_year') === 'on';
         }
         if (localStorage.getItem('echo_show_day_week')) {
-          document.getElementById('show-day-week-toggle').checked = localStorage.getItem('echo_day_week') === 'on' || localStorage.getItem('echo_show_day_week') === 'on';
+          document.getElementById('show-day-week-toggle').checked = localStorage.getItem('echo_show_day_week') === 'on';
         }
 
         if (localStorage.getItem('echo_weather_toggle')) {
           document.getElementById('show-weather-toggle').checked = localStorage.getItem('echo_weather_toggle') === 'on';
-        } else if (localStorage.getItem('echo_weather')) {
-          document.getElementById('show-weather-toggle').checked = localStorage.getItem('echo_weather') === 'on';
         }
 
         if (localStorage.getItem('echo_temp_unit')) {
@@ -1461,6 +1695,9 @@
 
       if (savedLat && savedLon) {
         enableWeatherOption();
+        if (!localStorage.getItem('echo_weather_toggle')) {
+          document.getElementById('show-weather-toggle').checked = true;
+        }
         fetchWeather(savedLat, savedLon);
       } else {
         disableWeatherOption();
@@ -1533,18 +1770,15 @@
       }
     });
 
-    document.addEventListener('mousemove', () => {
-      showControls();
-    });
+    document.addEventListener('mousemove', () => { showControls(); });
+    document.addEventListener('touchstart', () => { showControls(); });
 
-    document.addEventListener('touchstart', () => {
-      showControls();
-    });
+    makeDraggableAndResizable(document.getElementById('time-container'), 'clock', '--clock-scale');
+    makeDraggableAndResizable(document.getElementById('sub-info'), 'subinfo', '--subinfo-scale');
 
     setInterval(updateClock, 1000);
     loadSavedSettings();
 
-    // Automatically update weather every 5 minutes
     setInterval(() => {
       if (savedLat && savedLon && weatherAvailable) {
         fetchWeather(savedLat, savedLon);
@@ -1552,7 +1786,7 @@
     }, 5 * 60 * 1000);
   </script>
 
-  <!-- Keep-Silk-Open Script & Wake Lock Helper to prevent Echo/Silk timeout -->
+  <!-- Keep-Silk-Open Script & Wake Lock Helper -->
   <script>
     var AlwaysUseSilk = true;
   </script>
